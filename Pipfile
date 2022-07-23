@@ -12,6 +12,7 @@ flask-login = "*"
 dash-html-components = "*"
 dash-core-components = "*"
 plotly = "*"
+orjson = "*"
 
 [dev-packages]
 
