@@ -1,10 +1,7 @@
 from datetime import date
 import dataretrieval.nwis as nwis
 import utils.param_codes as pc
-import dash
-from dash import html
-from dash import dcc
-from dash.dependencies import Input, Output
+from dash import dash, html, dcc, Input, Output
 import plotly.graph_objects as go
 import pandas as pd
 
@@ -40,12 +37,53 @@ app.layout = html.Div(
             min_date_allowed=date(2018, 1, 1),
             initial_visible_month=date(2020, 1, 1),
         ),
-        dcc.Dropdown(
-            id="param_select",
-            options=pc.param_labels,
-            value="p00400",
+        html.Div(
+            [
+                "Select parameter by name: ",
+                dcc.Dropdown(
+                    id="param_select",
+                    options=pc.param_labels,
+                    value="p00400",
+                ),
+            ]
         ),
+        # Can't do optional parameters, probably put this on a seperate page.
+        # html.Div(
+        #     [
+        #         "Select parameter by code: ",
+        #         dcc.Input(
+        #             id="code_input",
+        #             value="p00400",
+        #             debounce=True,
+        #             autoFocus=True,
+        #             minLength=6,
+        #             placeholder="Enter parameter code",
+        #             type="text",
+        #         ),
+        #     ]
+        # ),
         dcc.Graph(id="scatter_plot"),
+        html.Div(
+            [
+                "Select parameter by name: ",
+                dcc.Dropdown(
+                    id="param_select_X",
+                    options=pc.param_labels,
+                    value="p00400",
+                ),
+            ]
+        ),
+        html.Div(
+            [
+                "Select parameter by name: ",
+                dcc.Dropdown(
+                    id="param_select_Y",
+                    options=pc.param_labels,
+                    value="p00400",
+                ),
+            ]
+        ),
+        dcc.Graph(id="plot_X_vs_Y"),
         dcc.Store(id="memory_data", storage_type="memory"),
     ],
 )
@@ -60,7 +98,7 @@ app.layout = html.Div(
     ],
 )
 def get_qw_data(site, start, end):
-    df = nwis.get_record(sites=site, service="qwdata", start=start, end=end)
+    df = nwis.get_record(sites=site, service="qwdata", start=start, end=end, access="3")
     return df.to_json()
 
 
@@ -76,14 +114,46 @@ def plot_parameter(param, data):
     fig = go.Figure(
         [
             go.Scatter(
+                mode="markers",
                 x=df.index,
                 y=df[param],
-                line=dict(color="firebrick", width=4),
                 name="pH",
             ),
         ],
     )
-    fig.update_layout(title="", xaxis_title="Date", yaxis_title=pc.parameters.get(param))
+    fig.update_layout(
+        title="",
+        xaxis_title="Date",
+        yaxis_title=pc.parameters.get(param),
+    )
+    return fig
+
+
+@app.callback(
+    Output("plot_X_vs_Y", "figure"),
+    [
+        Input("param_select_X", "value"),
+        Input("param_select_Y", "value"),
+        Input("memory_data", "data"),
+    ],
+)
+def x_vs_y(param_x, param_y, data):
+    df = pd.read_json(data)
+    fig = go.Figure(
+        [
+            go.Scatter(
+                mode="markers",
+                x=df[param_x],
+                y=df[param_y],
+                name="pH",
+            ),
+        ],
+    )
+    fig.update_layout(
+        title="",
+        xaxis_title=pc.parameters.get(param_x),
+        yaxis_title=pc.parameters.get(param_y),
+    )
     return fig
 
 
