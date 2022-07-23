@@ -1,0 +1,19 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+dataretrieval = "*"
+dash = "*"
+dash-bootstrap-components = "*"
+flask = "*"
+flask-login = "*"
+dash-html-components = "*"
+dash-core-components = "*"
+plotly = "*"
+
+[dev-packages]
+
+[requires]
+python_version = "3.10"
