@@ -4,6 +4,7 @@ import utils.param_codes as pc
 from dash import dash, html, dcc, Input, Output
 import plotly.graph_objects as go
 import pandas as pd
+from utils import download
 
 app = dash.Dash()
 
@@ -17,7 +18,7 @@ app.layout = html.Div(
         ),
         html.Div(
             [
-                "station_ID: ",
+                "Station ID: ",
                 dcc.Input(
                     id="station_ID",
                     value="12323840",
@@ -47,25 +48,10 @@ app.layout = html.Div(
                 ),
             ]
         ),
-        # Can't do optional parameters, probably put this on a seperate page.
-        # html.Div(
-        #     [
-        #         "Select parameter by code: ",
-        #         dcc.Input(
-        #             id="code_input",
-        #             value="p00400",
-        #             debounce=True,
-        #             autoFocus=True,
-        #             minLength=6,
-        #             placeholder="Enter parameter code",
-        #             type="text",
-        #         ),
-        #     ]
-        # ),
         dcc.Graph(id="scatter_plot"),
         html.Div(
             [
-                "Select parameter by name: ",
+                "Select X axis parameter: ",
                 dcc.Dropdown(
                     id="param_select_X",
                     options=pc.param_labels,
@@ -75,7 +61,7 @@ app.layout = html.Div(
         ),
         html.Div(
             [
-                "Select parameter by name: ",
+                "Select Y axis parameter: ",
                 dcc.Dropdown(
                     id="param_select_Y",
                     options=pc.param_labels,
@@ -83,7 +69,7 @@ app.layout = html.Div(
                 ),
             ]
         ),
-        dcc.Graph(id="plot_X_vs_Y"),
+        dcc.Graph(id="plot_X_vs_Y", style={"display": "inline-block"}),
         dcc.Store(id="memory_data", storage_type="memory"),
     ],
 )
@@ -154,6 +140,17 @@ def x_vs_y(param_x, param_y, data):
         xaxis_title=pc.parameters.get(param_x),
         yaxis_title=pc.parameters.get(param_y),
     )
+    fig.update_xaxes(
+        constrain="domain",
+    )
+    if param_x == param_x:
+        fig.update_xaxes(
+            constrain="domain",
+        )
+        fig.update_yaxes(
+            scaleanchor="x",
+            scaleratio=1,
+        )
     return fig
 
 
